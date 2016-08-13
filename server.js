@@ -1,6 +1,7 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var UrlInfo = require('./schema/UrlInfo');
+var urlvalidator = require('./modules/UrlValidator');
 var app = express();
 
 const dbPath = `mongodb://${process.env.IP}/urlshortener`;
@@ -12,68 +13,35 @@ app.get('/', (req, res) => {
 });
 
 app.get('/:shortUrl', (req, res) => {
-  res.send(`${req.params.shortUrl}`);
+  const requestedShortUrl = req.params.shortUrl;
+  const fullShortUrl = `https://${req.hostname}/${requestedShortUrl}`;
+  UrlInfo.findOne({short_url: fullShortUrl}, (err, url) => {
+    if(err) throw err;
+    if(!url) {
+      return res.send('Something went wrong, unable to find short url');
+    }
+    const redirectUrl = url.original_url;
+    return res.redirect(redirectUrl);
+  });
 });
-
-var re_weburl = new RegExp(
-  "^" +
-    // protocol identifier
-    "(?:(?:https?|ftp)://)" +
-    // user:pass authentication
-    "(?:\\S+(?::\\S*)?@)?" +
-    "(?:" +
-      // IP address exclusion
-      // private & local networks
-      "(?!(?:10|127)(?:\\.\\d{1,3}){3})" +
-      "(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})" +
-      "(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})" +
-      // IP address dotted notation octets
-      // excludes loopback network 0.0.0.0
-      // excludes reserved space >= 224.0.0.0
-      // excludes network & broacast addresses
-      // (first & last IP address of each class)
-      "(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])" +
-      "(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}" +
-      "(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))" +
-    "|" +
-      // host name
-      "(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)" +
-      // domain name
-      "(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*" +
-      // TLD identifier
-      "(?:\\.(?:[a-z\\u00a1-\\uffff]{2,}))" +
-      // TLD may end with dot
-      "\\.?" +
-    ")" +
-    // port number
-    "(?::\\d{2,5})?" +
-    // resource path
-    "(?:[/?#]\\S*)?" +
-  "$", "i"
-);
-
-const validateParamForUrl = function(paramValue) {
-  return re_weburl.test(paramValue);
-};
 
 app.get('/new/*', (req, res) => {
   const urlParam = req.params[0];
-  if(validateParamForUrl(urlParam)) {
+  if(urlvalidator(urlParam)) {
     const urlInfo = new UrlInfo();
     urlInfo.shortify(urlParam, req.hostname);
     urlInfo.save((err) => {
       if(err) throw err;
       console.log('urlInfo created');
     });
-    res.send(JSON.stringify(urlInfo.toObject()));
-  } else {
-    res.send(JSON.stringify({error: 'Invalid URL detected. Please enter a valid URL.'}));
+    return res.send(JSON.stringify(urlInfo.toObject()));
   }
+  return res.send(JSON.stringify({error: 'Invalid URL detected. Please enter a valid URL.'}));
 });
 
 app.get('/deleteall/*', (req, res) => {
   const urlParam = req.params[0];
-  if(validateParamForUrl(urlParam)) {
+  if(urlvalidator(urlParam)) {
     UrlInfo.find({original_url: urlParam}, (err, urls) => {
       if(err) throw err;
       if(!urls || urls.length < 1) {
