@@ -4,8 +4,8 @@ var UrlInfo = require('./schema/UrlInfo');
 var urlvalidator = require('./modules/UrlValidator');
 var app = express();
 
-const dbPath = `mongodb://${process.env.IP}/urlshortener`;
-mongoose.connect(dbPath);
+const mongoLabUrl = process.env.MONGOLAB_URI;
+mongoose.connect(mongoLabUrl);
 
 app.set('port', process.env.PORT || 8080);
 app.get('/', (req, res) => {
