@@ -51,6 +51,7 @@ app.get('/deleteall/*', (req, res) => {
         url.remove((err) => {
           if(err) throw err;
           console.log('url deleted');
+          
           });
         });
         res.send(`Deleted all entries containing url: ${urlParam}`);
