@@ -1,7 +1,7 @@
-var mongoose = require('mongoose'),
+const mongoose = require('mongoose'),
   Schema = mongoose.Schema;
 
-var urlSchema = new Schema({
+let urlSchema = new Schema({
   original_url: { type: String, default: '' },
   short_url: { type: String, default: '' }
 });
@@ -12,7 +12,7 @@ const generateRandom = (min, max) => {
 
 urlSchema.methods.shortify = function(original_url, base_url) {
   this.original_url = original_url;
-  this.short_url = `https://${base_url}/${generateRandom(1000, 9999)}`;
+  this.short_url = `${base_url}/${generateRandom(1000, 9999)}`;
 };
 
 if (!urlSchema.options.toObject) urlSchema.options.toObject = {};
@@ -22,6 +22,6 @@ urlSchema.options.toObject.transform = function (doc, ret, options) {
   return ret;
 }
 
-var UrlInfo = mongoose.model('UrlInfo', urlSchema);
+const UrlInfo = mongoose.model('UrlInfo', urlSchema);
 
 module.exports = UrlInfo;

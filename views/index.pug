@@ -1,0 +1,35 @@
+doctype html
+html(lang="en")
+  head
+    title Url shortener microservice
+    script(
+      type='text/javascript' 
+      src='https://code.jquery.com/jquery-3.2.1.min.js'
+      integrity='sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4='
+      crossorigin='anonymous'
+      )
+  body
+    h1 URL Shortener microservice.
+    p
+      |This microservice API lets you send a URL to 
+      code GET /new/:url 
+      | and receive a new shortened URL in the JSON response. <br/>
+      | You can then use that short URL in a GET request to 
+      code /:shortUrl 
+      | and you will be redirected to the original URL in your browser.<br/>
+      | You may also delete all the currently stored short URLs for a particular URL by doing a GET request to 
+      code /deleteall/:url.
+    h3 Usage:
+    p.
+      Type in a long URL:
+    input(type='text' placeholder='Long URL' id='data-input')
+    button(type='button' id='send-data') Send
+    Label <br/> <br/> Returned object: <br/>
+      code(id='return-object') null
+    d(id='short-url-container' style='display:none;')
+      h4 Short url link: 
+        a(href='' id='short-url')
+    h3 Example output:
+    code {"short_url": "https://urlshortly.herokuapp.com/,"original_url":"https://www.google.com"}
+    script(type='text/javascript' src='/static/javascript/index.js')
+    
