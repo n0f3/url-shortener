@@ -8,7 +8,8 @@ module.exports = (req, res) => {
   const urlParam = req.params[0];
   if(urlvalidator(urlParam)) {
     const urlInfo = new UrlInfo();
-    urlInfo.shortify(urlParam, req.hostname);
+    const appUrl = `${req.protocol}://${req.hostname}`;
+    urlInfo.shortify(urlParam, appUrl);
     urlInfo.save((err) => {
       if(err) throw err;
       console.log('urlInfo: ' + urlParam + 'created');

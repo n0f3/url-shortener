@@ -2,7 +2,7 @@ const UrlInfo = require('../../schema/UrlInfo');
 
 module.exports = (req, res) => {
   const requestedShortUrl = req.params.shortUrl;
-  const fullShortUrl = `${req.hostname}/${requestedShortUrl}`;
+  const fullShortUrl = `${req.protocol}://${req.hostname}/${requestedShortUrl}`;
   UrlInfo.findOne({short_url: fullShortUrl}, (err, url) => {
     if(err) throw err;
     if(!url) {
